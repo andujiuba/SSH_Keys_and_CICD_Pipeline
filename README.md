@@ -92,7 +92,7 @@ pwd
 - Source Code Management: click git
     - repository URL --> SSH for Github repo
     - credentials --> add private key from ssh folder (one without any extentions)(include everything)
-    Kind: SSH username w private key
+    Kind: **SSH username w private key**
     add description
     - give key name select key from crediential
     branch specifier --> change master to main 
@@ -162,7 +162,7 @@ Branch to merge to: main
 
 <br>
 
-#### TO RESEARCH:
+# TO RESEARCH:
 
 - What is staging (in regards to Jenkins)? **not every edit is saved --> must be added and committed
 **staging area** is a state of limbo between commiting and pushing to GiitHub --> is in users' control
