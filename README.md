@@ -12,22 +12,18 @@ ssh-keygen -t rsa -b 4096 -C "email Id used for git hub"
 
 2. Go to settings on GitHub and select `SSH GPG Keys`
 
-3. Create new ssh key
+3. Create a new SSH key
 
-4. Go back to local host and code: 
+4. Go back to local host and code:
 ``` bash
-cat id_rsa.pub
+cat "name of key".pub
 ```
-5. Paste in github and add -->
+5. Paste in github and add public key -->
 **secure connection established**
 
 6. Create new repo and select SSH on setup page
 
 
-
-
-
-![](img/jenkins_stages.png)
 
 <br><br>
 
@@ -36,6 +32,7 @@ cat id_rsa.pub
 ![](img/CICD.png)
 
 ## Jenkins
+![](img/jenkins_stages.png)
 ### *Setting up a New Project in Jenkins*
 
 1. In the main Jenkins menu, select `create new item`
@@ -70,10 +67,13 @@ pwd
 5. Select the completed job and `Console output`
 
 ## Creating a Pipeline
-- click configure in first job
-- post-build action --> build other projects
-- type in sewcond project and trigger if build is stable
-- click on build now
+
+Click `Configure` in first job
+### ***Post-build Actions:***
+**Build other projects:**
+Type in second project and `Trigger if build is stable`
+
+Click on `Build now`
 
 **TASKS:**
 - Generate a new SSH key called sre_jenkins (when prompted to name file)
@@ -133,34 +133,89 @@ Create new item with same settings as original GitHub-Jenkins project
 
 Change/Edit the following -
 
-***Branches to Build:*** 
-**Branch Specifier:** */dev
+### ***Source Code Management:***
+**Branches to Build:** 
+*Branch Specifier:* 
+*/dev
+
+### ***Build:***
+**Execute Shell**
+```bash
+cd app
+npm install
+npm test
+```
 
 ## Merging Code to Main with Jenkins
 
 Create new item with same settings as original GitHub-Jenkins project
 
-Change/Edit the following - 
+Change/Edit the following sections - 
 
-**Source Code Management:** *Branches to Build:* Branch Specifier: */dev
+### ***Source Code Management:***
+**Branches to Build:** 
+*Branch Specifier:* 
+*/dev
 
-**Additional Behaviours:**
-
-Merge before build
+**Additional Behaviours:** *Merge before build:*
 
 Name of repostiory: origin
 Branch to merge to: main
 
-***Post-build Actions:***
+### ***Post-build Actions:***
 **Git publisher:**
 - Select: Push only if build succeeds
 - Select: Merge results
 
 ## Copying to EC2 Instance with Jenkins
 
-### N/A
+Start up the EC2 instances and edit the security groups and NACLs to allow the Jenkins IP on port 22
 
-<br>
+### ***Build Environment:***
+**SSH Agent: Credentials**
+- Specific Credentials - Use the key that is connected to ec2 instances
+
+### ***Build:***
+**Execute Shell**
+
+```bash
+# Enter the app instance
+ssh -A -o "StrictHostKeyChecking=no" ubuntu@ec"APP IP" << 'EOF (remove quotes)'
+
+# remove old code and copy the new code
+
+rm -rf "OLD REPO"
+git clone "GIT REPO HTTPS"
+cd "GIT REPO"
+
+# run your provision.sh to install node with required dependencies for app instance - same goes for db instance (ensure to double check if node and db are actively running)
+
+# create an env to connect to db
+
+export DB_HOST=mongodb://52.215.204.66:27017/posts
+
+# navigate to app folder
+
+cd app
+
+npm install
+
+node seeds/seed.js
+
+# launch the app in the background
+
+nohup node app.js > /dev/null 2>&1 &
+
+EOF
+```
+After the instance has been run, make sure to stop the instances within the machine using:
+
+```bash
+ps aux
+# then delete any node/npm running using
+sudo kill "number"
+```
+<br><br>
 
 # TO RESEARCH:
 
